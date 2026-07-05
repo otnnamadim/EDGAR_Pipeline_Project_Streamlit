@@ -21,4 +21,3 @@ Install the required dependencies before running:
 
 ```bash
 pip install pandas requests
-``` 
