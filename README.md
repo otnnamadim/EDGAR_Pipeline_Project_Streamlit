@@ -10,10 +10,10 @@ Every public company filing with the SEC tags its financial statement data via X
 This project pulls that data directly from SEC's public API and flattens it into clean, analysis-ready `pandas` DataFrames — with a particular focus on distinguishing foreign private issuers (FPIs) from domestic filers. US-based companies, domestic filers, issue their financial statements under US GAAP, while many FPIs file under IFRS, with different XBRL taxonomies and tagging conventions entirely. 
 
 ## How it works?
+- **Defines the Companies on the Investment Watchlist** by listing out the Company Name, CIK, Ticker, and categorizing them as either Domestic or FPI based on their headquarters domeciliation.
 - **Pulls raw XBRL company facts** for any public company by referencing the company's CIK (Central Index Key) via the Company Facts API
 - **Flattens nested JSON Company Facts** into tidy DataFrames for all tagged financial statement line items
 - **Lists all available GAAP concepts** a company has reported to explore the available financial statement line before querying
-- **Distinguishes domestic filers from foreign private issuers** in its sample watchlist highlighting differences in accounting standards for each company
 
 
 ## Setup
@@ -21,19 +21,4 @@ Install the required dependencies before running:
 
 ```bash
 pip install pandas requests
-
 ``` 
-
-
-## Usage
-
-** - 1. Load the watchlist ** watchlist = afrotech_investment_watchlist()
-
-** - 2. Fetch a company's facts from SEC EDGAR ** (replace USER_AGENT with your email)
-data = get_company_facts("0000866374", user_agent="your@email.com")
-
-** - 3. See all available GAAP concepts for that company **
-metrics = list_available_gaap_metrics(data)
-
-** - 4. Pull a specific financial statement line item into a DataFrame ** 
-df = extract_fsli_to_dataframe(data, "RevenueFromContractWithCustomerExcludingAssessedTax")"
