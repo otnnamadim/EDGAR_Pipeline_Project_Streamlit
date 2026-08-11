@@ -1,6 +1,6 @@
 # EDGAR Pipeline Project
 
-This is a Python coding project developed for extracting and parsing financial statement data directly from the SEC's EDGAR Database via the Company Facts API, presented through an interactive Streamlit app.
+This is a Python coding project developed for extracting and parsing financial statement data from six SEC filers via the Company Facts API. The result is presented within an interactive Streamlit web application that displays depicts the historical trends.
 
 **Live app:** [aperture-insights-edgar-pull.streamlit.app](https://aperture-insights-edgar-pull.streamlit.app/)
 
@@ -8,9 +8,10 @@ This is a Python coding project developed for extracting and parsing financial s
 
 ## Why this project exists
 
-Every public company filing with the SEC tags its financial statement data via XBRL. I've previously worked on IFRS and US GAAP SEC financial reporting projects as a CPA where I've prepared disclosures and tagged XBRL data for submission to EDGAR; however, this project retrieves the 10-K, 10-Q, 6-K, 20/40-F report data from the investing public side.
+Every public company filing with the SEC tags their financial statements with XBRL tags. As an accounting consultant, I've previously worked on public company filings and converted the financial statements for a foreign private issuer from IFRS to US GAAP. Further, in financial reporting, I've prepared financial statement footnote disclosures and tagged each disclosure utilizing XBRL data in preparation for submission to EDGAR. This project is interesting because it retrieves the following filings types from the EDGAR database: 10-K, 10-Q, 6-K, 20/40-F report data in order to present financial data for both foreign and domestic filers.
 
-This project pulls that data directly from SEC's public API and flattens it into clean, analysis-ready `pandas` DataFrames — with a particular focus on distinguishing foreign private issuers (FPIs) from domestic filers. US-based companies, domestic filers, issue their financial statements under US GAAP, while many FPIs file under IFRS, with different XBRL taxonomies and tagging conventions entirely.
+## Distinguishing Foreign from Domestic filers
+The technology and semiconductor ecosystem consists of many players both domestic and abroad, and this listing is a small example of the nuance of comparing their financial statements. The data pipeline pulls the XBRL data via the Company Facts API and flattens it into `pandas` DataFrames with a particular focus on distinguishing foreign private issuers (FPIs) from domestic filers. US-based companies, domestic filers, issue their financial statements under US GAAP, while many FPIs file under IFRS, with different XBRL taxonomies and tagging conventions entirely.
 
 ## How it works
 
@@ -21,7 +22,7 @@ This project pulls that data directly from SEC's public API and flattens it into
 
 ## The Streamlit App
 
-The pipeline above is wrapped in an interactive Streamlit interface so the data is usable without touching the code:
+The Python program establishes the pipeline, and the resulting pandas outputs are wrapped in an interactive via a Streamlit interface so the data is usable without touching the code:
 
 - Select any company from the watchlist via dropdown
 - Select a financial metric (Total Assets, Total Equity, Liabilities, Total Income, Total Revenue)
@@ -30,15 +31,12 @@ The pipeline above is wrapped in an interactive Streamlit interface so the data 
 
 The app also surfaces the accounting logic under the hood — each result is captioned with the filer type (Domestic/FPI), the detected accounting standard (US-GAAP/IFRS), and the specific XBRL tag used to retrieve the value.
 
-## Known Issues & Limitations
+## Issues encountered in finalizing the StreamLit interface:
 
-**Foxconn (Hon Hai Precision Industry, HNHPF)** — Financials are published through the company's own investor relations portal as a PDF, not filed with the SEC as a 10-K or 20-F. No CIK-based XBRL data exists to pull. Currently omitted from the active watchlist.
+There were several companies that were
 
-**Infineon Technologies (IFNNY)** — Has a valid SEC CIK and has filed 20-F annual reports, but the Company Facts API returns no data. The company's financials do not appear to be tagged in XBRL format, which the `companyfacts` endpoint requires. Omitted from the active watchlist pending further investigation.
+**Vertiv (VRT) — resolved.** Total Revenue for the company was initially coded as "Revenues" via XBRL. The original result when preparing the data pipeline initially returned `$0` due to XBRL; however, Vertiv tags revenue as `RevenueFromContractWithCustomerExcludingAssessedTax` rather than "Revenues" as the majority of companies on this listing do. The code was updated to include the fallback logic to incorporate 'RevenueFromContractWithCustomerExcludingAssessedTax' in order to have a comparable revenue datapoint incorporated within the database.
 
-**STMicroelectronics (STM)** — Confirmed to file with the SEC (unlike the two above), but the pipeline's initial guess at the revenue tag name (`"Revenues"`) did not match STM's actual XBRL tag. Root cause not yet confirmed — deferred to keep the project moving.
-
-**Vertiv (VRT) — resolved.** Total Revenue initially returned `$0` due to XBRL tag variability: Vertiv tags revenue as `RevenueFromContractWithCustomerExcludingAssessedTax` (the ASC 606 contract-revenue element most domestic filers adopted post-2018), not the older, more generic `Revenues` tag the pipeline originally checked for. Fixed by trying a prioritized list of candidate tags per metric instead of a single hardcoded tag:
 
 ```python
 METRIC_MAPPING = {
@@ -50,7 +48,7 @@ METRIC_MAPPING = {
 }
 ```
 
-**Takeaway:** XBRL tagging is not perfectly standardized across filers, even within the same accounting standard. A tool that assumes one canonical tag name per financial concept will silently produce wrong (not missing) data for companies that tag differently — arguably more dangerous than an outright error.
+**Takeaway:** XBRL tagging is subject to the company's accounting team's discretion; as such, the tags are not perfectly standardized across filers even though the financial statement line items are reported comparably per the standards. It is still important to review the individual company's tags in order to understand whether or not the python script or the codes will properly pull the correct data. 
 
 ## Setup
 
@@ -82,7 +80,7 @@ streamlit run StreamlitApp.py
 
 ## About
 
-Built by [Ozoemena Nnamadim](https://www.otnnamadim.com), CPA — part of the **Aperture Insights** content series exploring the intersection of accounting, Python, and financial technology.
+Built by [Ozoemena Nnamadim](https://www.otnnamadim.com), CPA
 
 - [Website](https://www.otnnamadim.com)
 - [Project case study](https://www.otnnamadim.com/projects-case-studies/edgarfspull)
