@@ -77,9 +77,18 @@ def extract_fsli_to_dataframe(company_json: dict, fsli_name: str) -> pd.DataFram
         financial_statements = fsli_data["units"][unit_key]
         df = pd.DataFrame(financial_statements)
 
-        columns_to_keep = ["form", "fy", "fp", "start", "end", "val", "accn", "frame"]
+        columns_to_keep = ["form", "fy", "fp", "start", "end", "filed", "val", "accn", "frame"]
         df = df[[col for col in columns_to_keep if col in df.columns]]
         df["accounting_standard"] = accounting_standard
+
+        if "end" in df.columns:
+            df["end_date"] = pd.to_datetime(df["end"])
+        if "filed" in df.columns:
+            df["filed_date"] = pd.to_datetime(df["filed"])
+
+        sort_cols = [c for c in ["end_date", "filed_date"] if c in df.columns]
+        if sort_cols:
+            df = df.sort_values(by=sort_cols, ascending=False).reset_index(drop=True)
 
         return df
 
