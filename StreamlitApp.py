@@ -20,13 +20,7 @@ def get_latest_value(df: pd.DataFrame) -> float:
     if df.empty:
         return None
 
-    # Filter for full-year / annual reports to maintain comparability, or fall back to latest form
-    annuals = df[df["form"].isin(["10-K", "20-F"])]
-    target_df = annuals if not annuals.empty else df
-
-    # Sort by fiscal year and fiscal period to get the latest data point
-    target_df = target_df.sort_values(by=["fy", "fp"], ascending=[False, False])
-    return target_df.iloc[0]["val"]
+    return df.iloc[0]["val"]
 
 # ---------- Page setup ----------
 st.set_page_config(page_title="Aperture Insights — EDGAR Pipeline", layout="wide")
