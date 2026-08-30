@@ -90,7 +90,11 @@ if pull_button:
         annuals = metric_df[metric_df["form"].isin(["10-K", "20-F"])]
         chart_source = annuals if not annuals.empty else metric_df
         chart_df = chart_source[["end", "val"]].dropna().drop_duplicates(subset="end").sort_values("end")
+
+        
         if len(chart_df) > 1:
             st.line_chart(chart_df.set_index("end"))
+            st.subheader("Historical Annual Trend")
+            st.caption("Includes audited full-year filings (10-K & 10-F) to evaluate long-term trajectories.")
 else:
     st.info("Select a company and metric in the sidebar, then click **Pull Data**.")
