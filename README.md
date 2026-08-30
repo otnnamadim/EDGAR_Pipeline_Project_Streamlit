@@ -11,7 +11,7 @@ This is a Python coding project developed for extracting and parsing financial s
 Every public company filing with the SEC tags their financial statements with XBRL tags. As an accounting consultant, I've previously worked on public company filings and converted the financial statements for a foreign private issuer from IFRS to US GAAP. Further, in financial reporting, I've prepared financial statement footnote disclosures and tagged each disclosure utilizing XBRL data in preparation for submission to EDGAR. This project is interesting because it retrieves the following filings types from the EDGAR database: 10-K, 10-Q, 6-K, 20/40-F report data in order to present financial data for both foreign and domestic filers.
 
 ## Distinguishing Foreign from Domestic filers
-The technology and semiconductor ecosystem consists of many players both domestic and abroad, and this listing is a small example of the nuance of comparing their financial statements. The data pipeline pulls the XBRL data via the Company Facts API and flattens it into `pandas` DataFrames with a particular focus on distinguishing foreign private issuers (FPIs) from domestic filers. US-based companies, domestic filers, issue their financial statements under US GAAP, while many FPIs file under IFRS, with different XBRL taxonomies and tagging conventions entirely.
+The technology sector and semiconductor ecosystem consists of many players both domestic and abroad, and this listing is a small example of the nuance of comparing their financial statements. The data pipeline pulls the XBRL data via the Company Facts API and flattens it into `pandas` DataFrames with a particular focus on distinguishing foreign private issuers (FPIs) from domestic filers. US-based companies, domestic filers, issue their financial statements under US GAAP, while many FPIs file under IFRS, with different XBRL taxonomies and tagging conventions entirely.
 
 ## How it works
 
@@ -30,23 +30,6 @@ The Python program establishes the pipeline, and the resulting pandas outputs ar
 - View the latest reported figure, the full historical data table (form type, fiscal year, period, value, accession number), and a trend chart across annual filings
 
 The app also surfaces the accounting logic under the hood — each result is captioned with the filer type (Domestic/FPI), the detected accounting standard (US-GAAP/IFRS), and the specific XBRL tag used to retrieve the value.
-
-## Issues encountered in finalizing the StreamLit interface:
-
-There were several companies that were
-
-**Vertiv (VRT) — resolved.** Total Revenue for the company was initially coded as "Revenues" via XBRL. The original result when preparing the data pipeline initially returned `$0` due to XBRL; however, Vertiv tags revenue as `RevenueFromContractWithCustomerExcludingAssessedTax` rather than "Revenues" as the majority of companies on this listing do. The code was updated to include the fallback logic to incorporate 'RevenueFromContractWithCustomerExcludingAssessedTax' in order to have a comparable revenue datapoint incorporated within the database.
-
-
-```python
-METRIC_MAPPING = {
-    "Total Revenue": {
-        "us-gaap": ["RevenueFromContractWithCustomerExcludingAssessedTax", "Revenues"],
-        "ifrs-full": ["Revenue"]
-    },
-    # ... same pattern for other metrics
-}
-```
 
 **Takeaway:** XBRL tagging is subject to the company's accounting team's discretion; as such, the tags are not perfectly standardized across filers even though the financial statement line items are reported comparably per the standards. It is still important to review the individual company's tags in order to understand whether or not the python script or the codes will properly pull the correct data. 
 
